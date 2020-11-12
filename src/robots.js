@@ -1,4 +1,4 @@
-const robotributes = [
+export const robotributes = [
   { id: '973012', name: 'maid-robot-1', attr: ['cleaner','vintage'], badge: 0, price: 1.3 },
   { id: '973013', name: 'cleaner-robot', attr: ['cleaner', 'vintage'], badge: 2, price: 2.2 },
   { id: '973014', name: 'maid-robot-2', attr: ['cleaner','vintage'], badge: 0, price: 1.4 },

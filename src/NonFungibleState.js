@@ -22,7 +22,10 @@ export function useNonFungibleState() {
     botwallet: nonFungibleState.botwallet,
     basket   : ids
   })};
-  return { nonFungibleState, setForSales, setBotWallet, setBasket };
+  const isReady = () => {
+    return !(nonFungibleState.forsales.length === 0 && nonFungibleState.botwallet.length === 0 && nonFungibleState.basket.length === 0);
+  }
+  return { nonFungibleState, setForSales, setBotWallet, setBasket, isReady, setNonFungibleState };
 }
 
 export const [NonFungibleStateProvider, useNonFungibleStateContext] = constate(useNonFungibleState);
