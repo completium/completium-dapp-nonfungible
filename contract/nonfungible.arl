@@ -10,18 +10,27 @@ asset ledger identified by ltoken {
   lowner     : address;
 }
 
-asset allowance identified by atoken {
-  atoken     : nat;
-  aoperator  : address;
+asset operator identified by oaddr otoken oowner {
+  oaddr       : address;
+  otoken      : nat;
+  oowner      : address;
 }
 
-entry approve (spender : address, tokenid : nat) {
-  require {
-    r1 otherwise "NOT_OWNER": ledger[tokenid].lowner = caller
-  }
-  effect {
-    allowance.add({tokenid; spender});
-  }
+record operator_param {
+  opp_owner    : address;
+  opp_operator : address;
+  opp_token_id : nat
+}
+
+entry update_operators (upl : list<or<operator_param, operator_param>>) {
+  for up in upl do
+    match_or up with
+    | left(param) -> // add
+      operator.addupdate((param.opp_operator, param.opp_token_id, param.opp_owner), {})
+    | right(param) -> // remove
+      operator.remove((param.opp_operator, param.opp_token_id, param.opp_owner))
+    end;
+  done;
 }
 
 record transfer_destination {
@@ -33,8 +42,8 @@ record transfer_destination {
 entry %transfer (%from : address, tds : list<transfer_destination>) {
   for td in tds do begin
     if caller <> %from then begin
-      // check allowance
-      dorequire(allowance[td.token_id_dest].aoperator = caller, "NOT_ALLOWED");
+      // check operator
+      dorequire(operator.contains((caller,td.token_id_dest,%from)),"OPERATOR_NOT_ALLOWED");
     end;
     // set token ownership
     ledger.addupdate(td.token_id_dest,{ lowner = td.to_dest });
@@ -47,7 +56,16 @@ entry buy (tokenids : list<nat>) {
     var price = token[tokenid].tprice;
     var owner = ledger[tokenid].lowner;
     transfer price to owner;
-    transfer 0tz to entry self.%transfer(owner,[{ to_dest = caller; token_id_dest = tokenid; token_amount_dest = 1 }]);
+    transfer 0tz to entry self.update_operators([right<operator_param>({
+        opp_owner = owner;
+        opp_operator = caller;
+        opp_token_id = tokenid
+      })]);
+    transfer 0tz to entry self.%transfer(owner,[{
+      to_dest = caller;
+      token_id_dest = tokenid;
+      token_amount_dest = 1
+    }]);
     total += price;
   end done;
   dorequire(transferred >= total, "INSUFFICIENT_TRANSFERRED");
@@ -66,7 +84,7 @@ record balance_of_response {
 getter balance_of (brs : list<balance_of_request>) : list<balance_of_response> {
   return map(brs, br -> {
     request = br;
-    balance_ = (if ledger[br.btoken_id] = br.bo_owner
+    balance_ = (if ledger[br.btoken_id].lowner = br.bo_owner
                 then 1
                 else 0)
   })
