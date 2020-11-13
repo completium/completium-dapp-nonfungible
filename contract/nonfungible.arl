@@ -20,7 +20,7 @@ record operator_param {
   opp_owner    : address;
   opp_operator : address;
   opp_token_id : nat
-}
+} as ((owner, (operator, token_id)))
 
 entry update_operators (upl : list<or<operator_param, operator_param>>) {
   for up in upl do
@@ -37,7 +37,7 @@ record transfer_destination {
   to_dest           : address;
   token_id_dest     : nat;
   token_amount_dest : nat
-}
+} as ((to_, (token_id, amount)))
 
 entry %transfer (%from : address, tds : list<transfer_destination>) {
   for td in tds do begin
@@ -74,12 +74,12 @@ entry buy (tokenids : list<nat>) {
 record balance_of_request {
   bo_owner : address;
   btoken_id : nat;
-}
+} as ((owner, token_id))
 
 record balance_of_response {
   request : balance_of_request;
   balance_ : nat;
-}
+} as ((request, balance))
 
 getter balance_of (brs : list<balance_of_request>) : list<balance_of_response> {
   return map(brs, br -> {
