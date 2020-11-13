@@ -90,7 +90,7 @@ getter balance_of (requests : list<balance_of_request>) : list<balance_of_respon
   })
 }
 
-getter token_metadata_registry () : address { return selfaddress }
+entry token_metadata_registry (c : contract<address>) { transfer 0tz to entry c(selfaddress); }
 
 asset token_metadata to big_map {
   key_token_id   : nat;
