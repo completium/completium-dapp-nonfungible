@@ -17,10 +17,10 @@ asset allowance identified by atoken {
 
 entry approve (spender : address, tokenid : nat) {
   require {
-    r1 otherwise "NOT_OWNER": ledger[tokenid].owner = caller
+    r1 otherwise "NOT_OWNER": ledger[tokenid].lowner = caller
   }
   effect {
-    allowance.add({tokenid; caller; spender});
+    allowance.add({tokenid; spender});
   }
 }
 
@@ -34,10 +34,10 @@ entry %transfer (%from : address, tds : list<transfer_destination>) {
   for td in tds do begin
     if caller <> %from then begin
       // check allowance
-      dorequire(allowance[td.token_id].operator = caller, "NOT_ALLOWED");
+      dorequire(allowance[td.token_id_dest].aoperator = caller, "NOT_ALLOWED");
     end;
     // set token ownership
-    ledger.addupdate(td.token_id,{ owner = td.to_dest });
+    ledger.addupdate(td.token_id_dest,{ lowner = td.to_dest });
   end done;
 }
 
@@ -47,7 +47,7 @@ entry buy (tokenids : list<nat>) {
     var price = token[tokenid].tprice;
     var owner = ledger[tokenid].lowner;
     transfer price to owner;
-    transfer 0tz to self.%transfer(owner,[{ caller; tokenid; 1 }]);
+    transfer 0tz to entry self.%transfer(owner,[{ to_dest = caller; token_id_dest = tokenid; token_amount_dest = 1 }]);
     total += price;
   end done;
   dorequire(transferred >= total, "INSUFFICIENT_TRANSFERRED");
