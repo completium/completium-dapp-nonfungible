@@ -25,7 +25,7 @@ record operator_param {
 entry update_operators (upl : list<or<operator_param, operator_param>>) {
   for up in upl do
     match_or up with
-    | left(param) -> // add
+    | left(param)  -> // add
       operator.addupdate((param.opp_operator, param.opp_token_id, param.opp_owner), {})
     | right(param) -> // remove
       operator.remove((param.opp_operator, param.opp_token_id, param.opp_owner))
@@ -88,4 +88,15 @@ getter balance_of (brs : list<balance_of_request>) : list<balance_of_response> {
                 then 1
                 else 0)
   })
+}
+
+getter token_metadata_registry () : address { return selfaddress }
+
+asset token_metadata to big_map {
+  key_token_id   : nat;
+  token_id       : nat;
+  symbol         : string;
+  name           : string;
+  decimals       : nat;
+  extras         : map<string, string>;
 }
