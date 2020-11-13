@@ -81,8 +81,8 @@ record balance_of_response {
   balance_ : nat;
 } as ((request, balance))
 
-getter balance_of (brs : list<balance_of_request>) : list<balance_of_response> {
-  return map(brs, br -> {
+getter balance_of (requests : list<balance_of_request>) : list<balance_of_response> {
+  return map(requests, br -> {
     request = br;
     balance_ = (if ledger[br.btoken_id].lowner = br.bo_owner
                 then 1
