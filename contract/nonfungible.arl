@@ -52,3 +52,22 @@ entry buy (tokenids : list<nat>) {
   end done;
   dorequire(transferred >= total, "INSUFFICIENT_TRANSFERRED");
 }
+
+record balance_of_request {
+  bo_owner : address;
+  btoken_id : nat;
+}
+
+record balance_of_response {
+  request : balance_of_request;
+  balance_ : nat;
+}
+
+getter balance_of (brs : list<balance_of_request>) : list<balance_of_response> {
+  return map(brs, br -> {
+    request = br;
+    balance_ = (if ledger[br.btoken_id] = br.bo_owner
+                then 1
+                else 0)
+  })
+}
