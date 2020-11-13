@@ -1,0 +1,54 @@
+archetype nonfungible
+
+asset token {
+  tid        : nat;
+  tprice     : tez;
+}
+
+asset ledger identified by ltoken {
+  ltoken     : nat;
+  lowner     : address;
+}
+
+asset allowance identified by atoken {
+  atoken     : nat;
+  aoperator  : address;
+}
+
+entry approve (spender : address, tokenid : nat) {
+  require {
+    r1 otherwise "NOT_OWNER": ledger[tokenid].owner = caller
+  }
+  effect {
+    allowance.add({tokenid; caller; spender});
+  }
+}
+
+record transfer_destination {
+  to_dest           : address;
+  token_id_dest     : nat;
+  token_amount_dest : nat
+}
+
+entry %transfer (%from : address, tds : list<transfer_destination>) {
+  for td in tds do begin
+    if caller <> %from then begin
+      // check allowance
+      dorequire(allowance[td.token_id].operator = caller, "NOT_ALLOWED");
+    end;
+    // set token ownership
+    ledger.addupdate(td.token_id,{ owner = td.to_dest });
+  end done;
+}
+
+entry buy (tokenids : list<nat>) {
+  var total = 0;
+  for tokenid in tokenids do begin
+    var price = token[tokenid].tprice;
+    var owner = ledger[tokenid].lowner;
+    transfer price to owner;
+    transfer 0tz to self.%transfer(owner,[{ caller; tokenid; 1 }]);
+    total += price;
+  end done;
+  dorequire(transferred >= total, "INSUFFICIENT_TRANSFERRED");
+}
