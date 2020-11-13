@@ -43,7 +43,7 @@ entry %transfer (%from : address, tds : list<transfer_destination>) {
   for td in tds do begin
     if caller <> %from then begin
       // check operator
-      dorequire(operator.contains((caller,td.token_id_dest,%from)),"OPERATOR_NOT_ALLOWED");
+      dorequire(operator.contains((caller,td.token_id_dest,%from)),"FA2_NOT_OPERATOR");
     end;
     // set token ownership
     ledger.addupdate(td.token_id_dest,{ lowner = td.to_dest });
@@ -56,16 +56,16 @@ entry buy (tokenids : list<nat>) {
     var price = token[tokenid].tprice;
     var owner = ledger[tokenid].lowner;
     transfer price to owner;
-    transfer 0tz to entry self.update_operators([right<operator_param>({
-        opp_owner = owner;
-        opp_operator = caller;
-        opp_token_id = tokenid
-      })]);
     transfer 0tz to entry self.%transfer(owner,[{
       to_dest = caller;
       token_id_dest = tokenid;
       token_amount_dest = 1
     }]);
+    transfer 0tz to entry self.update_operators([right<operator_param>({
+        opp_owner = owner;
+        opp_operator = caller;
+        opp_token_id = tokenid
+      })]);
     total += price;
   end done;
   dorequire(transferred >= total, "INSUFFICIENT_TRANSFERRED");
