@@ -220,7 +220,7 @@ asset ledger identified by ltoken {
 
 
 /*
-  completium-cli call KT1BTLJY8cTCyLg4QMDxYoMZPMLKLxz5HQeQ as guillaume --entry '%update_operators' --with '[   left<address * address * nat>((@tz1Lc2qBKEWCBeDU8npG6zCeCqpmaegRi6Jg, @KT1BTLJY8cTCyLg4QMDxYoMZPMLKLxz5HQeQ, 973012));
+  completium-cli call KT1BTLJY8cTCyLg4QMDxYoMZPMLKLxz5HQeQ as jg --entry '%update_operators' --with '[   left<address * address * nat>((@tz1Lc2qBKEWCBeDU8npG6zCeCqpmaegRi6Jg, @KT1BTLJY8cTCyLg4QMDxYoMZPMLKLxz5HQeQ, 973012));
   left<address * address * nat>((@tz1Lc2qBKEWCBeDU8npG6zCeCqpmaegRi6Jg, @KT1BTLJY8cTCyLg4QMDxYoMZPMLKLxz5HQeQ, 973013));
   left<address * address * nat>((@tz1Lc2qBKEWCBeDU8npG6zCeCqpmaegRi6Jg, @KT1BTLJY8cTCyLg4QMDxYoMZPMLKLxz5HQeQ, 973014));
   left<address * address * nat>((@tz1Lc2qBKEWCBeDU8npG6zCeCqpmaegRi6Jg, @KT1BTLJY8cTCyLg4QMDxYoMZPMLKLxz5HQeQ, 973015));
@@ -343,10 +343,10 @@ entry update_operators (upl : list<or<operator_param, operator_param>>) {
   for up in upl do
     match_or up with
     | left(param)  -> // add
-      dorequire(ledger[param.opp_token_id].lowner = caller, "CALLER NOT OWNER");
+      dorequire(ledger[param.opp_token_id].lowner = source, "CALLER NOT OWNER");
       operator.addupdate((param.opp_operator, param.opp_token_id, param.opp_owner), {})
     | right(param) -> // remove
-      dorequire(ledger[param.opp_token_id].lowner = caller, "CALLER NOT OWNER");
+      dorequire(ledger[param.opp_token_id].lowner = source, "CALLER NOT OWNER");
       operator.remove((param.opp_operator, param.opp_token_id, param.opp_owner))
     end;
   done;
