@@ -422,7 +422,7 @@ entry buy (tokenids : list<nat>) {
     /* reset permission */
     transfer 0tz to entry self.update_operators([right<operator_param>({
         opp_owner = owner;
-        opp_operator = caller;
+        opp_operator = selfaddress;
         opp_token_id = tokenid
       })]);
     total += price;
