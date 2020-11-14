@@ -1,8 +1,113 @@
 archetype nonfungible
 
+/* STORAGE --------------------------------------------------------------------*/
+
 asset token {
   tid        : nat;
   tprice     : tez;
+} initialized by {
+  { 973012;  1.3tz };
+  { 973013;  2.2tz };
+  { 973014;  1.4tz };
+  { 973015;  3.4tz };
+  { 973016;  2.8tz };
+  { 973017;  1.0tz };
+  { 973018;  2.4tz };
+  { 973019;  4.1tz };
+  { 973020; 12.4tz };
+  { 973021; 18.9tz };
+  { 973022;  1.2tz };
+  { 973023;  2.7tz };
+  { 973024;  4.0tz };
+  { 973025;  1.9tz };
+  { 973026;  3.7tz };
+  { 973027;  4.1tz };
+  { 973028;  2.5tz };
+  { 973029;  0.4tz };
+  { 973030;  1.9tz };
+  { 973031;  0.5tz };
+  { 973032;  0.4tz };
+  { 973033;  0.2tz };
+  { 973034;  7.8tz };
+  { 973035;  5.6tz };
+  { 973036;  5.6tz };
+  { 973037;  5.6tz };
+  { 973038;  5.6tz };
+  { 973039;  7.6tz };
+  { 973040;  5.3tz };
+  { 973041;  5.3tz };
+  { 973042;  1.4tz };
+  { 973043;  8.6tz };
+  { 973044;  4.9tz };
+  { 973045;  5.3tz };
+  { 973046;  9.5tz };
+  { 973047;  7.5tz };
+  { 973048;  8.0tz };
+  { 973049;  7.4tz };
+  { 973050;  6.1tz };
+  { 973051;  5.0tz };
+  { 973052;  3.1tz };
+  { 973053;  6.7tz };
+  { 973054;  8.0tz };
+  { 973055;  4.0tz };
+  { 973056;  4.1tz };
+  { 973057;  3.1tz };
+  { 973058; 12.1tz };
+  { 973059;  4.7tz };
+  { 973060;  3.2tz };
+  { 973061;  4.5tz };
+  { 973062;  3.5tz };
+  { 973063;  3.4tz };
+  { 973064;  5.6tz };
+  { 973065;  3.3tz };
+  { 973066;  3.6tz };
+  { 973067;  3.5tz };
+  { 973068;  3.3tz };
+  { 973069;  4.1tz };
+  { 973070;  3.6tz };
+  { 973071;  3.7tz };
+  { 973072;  3.2tz };
+  { 973073;  5.1tz };
+  { 973074; 12.1tz };
+  { 973075;  9.5tz };
+  { 973076; 14.1tz };
+  { 973077; 10.5tz };
+  { 973078; 11.3tz };
+  { 973079; 10.5tz };
+  { 973080; 10.5tz };
+  { 973081;  4.5tz };
+  { 973082; 10.5tz };
+  { 973083; 13.4tz };
+  { 973084; 17.6tz };
+  { 973085; 27.6tz };
+  { 973086; 39.6tz };
+  { 973087; 42.6tz };
+  { 973088; 34.3tz };
+  { 973089; 28.3tz };
+  { 973090; 44.2tz };
+  { 973091; 26.4tz };
+  { 973092; 24.5tz };
+  { 973093; 23.9tz };
+  { 973094; 14.3tz };
+  { 973095; 12.3tz };
+  { 973096; 11.3tz };
+  { 973097;  6.5tz };
+  { 973098;  4.9tz };
+  { 973099;  8.4tz };
+  { 973100;  4.3tz };
+  { 973101;  4.2tz };
+  { 973102;  4.5tz };
+  { 973103; 12.3tz };
+  { 973104; 15.6tz };
+  { 973105;  4.6tz };
+  { 973106;  5.5tz };
+  { 973107;  4.5tz };
+  { 973108;  2.3tz };
+  { 973109;  4.5tz };
+  { 973110;  4.2tz };
+  { 973111;  3.2tz };
+  { 973112;  2.2tz };
+  { 973113;  1.4tz }
 }
 
 asset ledger identified by ltoken {
@@ -15,6 +120,8 @@ asset operator identified by oaddr otoken oowner {
   otoken      : nat;
   oowner      : address;
 }
+
+/* FA INTERFACE ---------------------------------------------------------------*/
 
 record operator_param {
   opp_owner    : address;
@@ -54,27 +161,6 @@ entry %transfer (txs : list<address * list<transfer_destination>>) {
   done
 }
 
-entry buy (tokenids : list<nat>) {
-  var total = 0;
-  for tokenid in tokenids do begin
-    var price = token[tokenid].tprice;
-    var owner = ledger[tokenid].lowner;
-    transfer price to owner;
-    transfer 0tz to entry self.%transfer([(owner,[{
-      to_dest = caller;
-      token_id_dest = tokenid;
-      token_amount_dest = 1
-    }])]);
-    transfer 0tz to entry self.update_operators([right<operator_param>({
-        opp_owner = owner;
-        opp_operator = caller;
-        opp_token_id = tokenid
-      })]);
-    total += price;
-  end done;
-  dorequire(transferred >= total, "INSUFFICIENT_TRANSFERRED");
-}
-
 record balance_of_request {
   bo_owner : address;
   btoken_id : nat;
@@ -103,4 +189,41 @@ asset token_metadata to big_map {
   name           : string;
   decimals       : nat;
   extras         : map<string, string>;
+} initialized by {
+  { 1; 1; "CRB"; "CRYPTOBOTOKEN", 0, [] }
 }
+
+/* TOKEN EXCHANGE INTERFACE ---------------------------------------------------*/
+
+entry buy (tokenids : list<nat>) {
+  var total = 0;
+  for tokenid in tokenids do begin
+    var price = token[tokenid].tprice;
+    var owner = ledger[tokenid].lowner;
+    transfer price to owner;
+    /* transfer ownership */
+    transfer 0tz to entry self.%transfer([(owner,[{
+      to_dest = caller;
+      token_id_dest = tokenid;
+      token_amount_dest = 1
+    }])]);
+    /* reset permission */
+    transfer 0tz to entry self.update_operators([right<operator_param>({
+        opp_owner = owner;
+        opp_operator = caller;
+        opp_token_id = tokenid
+      })]);
+    total += price;
+  end done;
+  dorequire(transferred >= total, "INSUFFICIENT_TRANSFERRED");
+}
+
+entry sell (tokenid : nat) {
+  transfer 0tz to entry self.update_operators([left<operator_param>{
+    opp_owner = caller;
+    opp_operator = selfaddress;
+    opp_token_id = tokenid;
+  }])
+}
+
+
