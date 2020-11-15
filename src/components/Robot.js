@@ -5,6 +5,8 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import LocalOfferIcon from '@material-ui/icons/LocalOffer';
 import { useNonFungibleStateContext } from '../NonFungibleState.js';
+import { contractAddress } from '../settings';
+import { useTezos } from '../dapp';
 
 function getName(n) {
   var lbls = n.split('-');
@@ -17,19 +19,23 @@ function getName(n) {
 }
 
 const Robot = (props) => {
-  const { nonFungibleState, setBasket, setNonFungibleState } = useNonFungibleStateContext();
+  const { nonFungibleState, setBasket, setNotReady } = useNonFungibleStateContext();
+  const tezos = useTezos();
   const handleClick = () => {
     setBasket(nonFungibleState.basket.concat([props.data.id]));
   };
   const handleSell = () => {
-    var forsales = nonFungibleState.forsales;
-    forsales.push(props.data.id);
-    setNonFungibleState({
-      forsales: forsales,
-      botwallet: nonFungibleState.botwallet.filter(id => id !== props.data.id),
-      basket: nonFungibleState.basket
-    })
+    tezos.wallet.at(contractAddress).then(contract => {
+      contract.methods.sell(props.data.id).send().then(op => {
+        props.openSnack();
+        op.receipt().then(() => {
+          props.closeSnack();
+          setNotReady();
+        })
+      })
+    });
   }
+  const sold = nonFungibleState.forsales.includes(props.data.id);
   return (
     <div>
     <Paper elevation={1} style={{ width:200 }}>
@@ -52,7 +58,13 @@ const Robot = (props) => {
         }
         </Grid>
         <Grid item>
-          <img src={process.env.PUBLIC_URL + "/images/streamline-icon-" + props.data.name + "@200x200.svg"}></img>
+          { (sold && props.value !== 0)? (
+            <img src={process.env.PUBLIC_URL + "/images/streamline-icon-" + props.data.name + "@200x200.svg"} style={{
+              filter: 'grayscale(1) blur(1px)'
+            }}></img>
+          ):(
+            <img src={process.env.PUBLIC_URL + "/images/streamline-icon-" + props.data.name + "@200x200.svg"}></img>
+          ) }
         </Grid>
         <Grid item>
           <Typography style={{
@@ -80,7 +92,11 @@ const Robot = (props) => {
           <Typography color='textSecondary'>{props.data.price}ꜩ</Typography>
         </Grid>
         <Grid item xs={4}>
-          <Button color='secondary' variant='outlined' disableElevation size='small' onClick={handleSell}>sell</Button>
+          { (sold)? (
+            <Typography color='textSecondary'>Sold</Typography>
+            ):(
+            <Button color='secondary' variant='outlined' disableElevation size='small' onClick={handleSell}>sell</Button>
+          )}
         </Grid>
       </Grid>
     ) : (

@@ -1,11 +1,11 @@
 import './App.css';
 import React, { useState, useRef } from 'react';
-import { appTitle, appName, network } from './settings.js';
+import { appTitle, appName, network, contractAddress } from './settings.js';
 import HeaderBar from './components/HeaderBar';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
-import { DAppProvider, useConnect, useReady } from './dapp.js';
+import { DAppProvider, useAccountPkh, useConnect, useReady } from './dapp.js';
 import SnackMsg from './components/SnackMsg';
 import Footer from './components/Footer';
 import Container from '@material-ui/core/Container';
@@ -18,6 +18,8 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Account from './components/Account';
 import SortButton from './components/SortButton';
+import { TezosToolkit } from '@taquito/taquito';
+import { LinearProgress } from '@material-ui/core';
 
 function App() {
   return (
@@ -42,7 +44,9 @@ function PageRouter (props) {
   const [value, setValue] = React.useState(0);
   const [selectedIndex, setSelectedIndex] = React.useState(0);
   const ready = useReady();
-  const { nonFungibleState, isReady, setForSales } = useNonFungibleStateContext();
+  const Tezos = new TezosToolkit('https://delphinet-tezos.giganode.io/');
+  const { nonFungibleState, isReady, setNonFungibleState, setNotReady } = useNonFungibleStateContext();
+  const accountAddress = useAccountPkh();
   const compareRobot = (a, b) => {
     switch (selectedIndex) {
       case 0: return strcmp(a.name,b.name);
@@ -56,7 +60,34 @@ function PageRouter (props) {
   }
   robotributes.sort(compareRobot);
   if (!isReady()) {
-    setForSales(robotributes.map(r => r.id));
+    Tezos.contract
+    .at(contractAddress)
+    .then(contract => {
+      contract.storage().then(storage => {
+        var forsales = [];
+        var botwallet = [];
+        // operator is an array
+        storage.operator.forEach(element => {
+          forsales.push(element[1].toString());
+        });
+        // ledger is a map
+        // read ledger for ownership information
+        if (ready) {
+          storage.ledger.forEach((l,k,m) => {
+            if(l === accountAddress) {
+              botwallet.push(k);
+            }
+          })
+        }
+        setNonFungibleState({
+          forsales  : forsales,
+          botwallet : botwallet,
+          basket    : nonFungibleState.basket,
+          ready     : true
+        });
+      })
+    })
+    .catch(error => console.log(`Error: ${error}`));
   }
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -79,6 +110,7 @@ function PageRouter (props) {
   const handleConnect = React.useCallback(async () => {
     try {
       await connect(network);
+      setNotReady();
     } catch (err) {
       alert(err.message);
     };
@@ -90,12 +122,10 @@ function PageRouter (props) {
     setViewSnack(false);
   }
   const displayedRobots =  robotributes.filter((r) => {
-    if (nonFungibleState !== undefined) {
-      switch(value) {
-        case 0: return nonFungibleState.forsales.includes(r.id); break;
-        case 1: return nonFungibleState.botwallet.includes(r.id); break;
-        default: return false;
-      }
+    switch(value) {
+      case 0: return nonFungibleState.forsales.includes(r.id); break;
+      case 1: return nonFungibleState.botwallet.includes(r.id); break;
+      default: return false;
     }
   });
   console.log(`nb robots to display: ${displayedRobots.length}`);
@@ -115,7 +145,7 @@ function PageRouter (props) {
             }}>Cryptobots</Typography>
           </Grid>
           <Grid item xs={7}>
-            <Account />
+            <Account openSnack={openSnack} closeSnack={closeSnack} />
           </Grid>
           <Grid item xs={8}></Grid>
           <Container maxWidth='md' style={{ marginTop: 0 }}>
@@ -141,17 +171,24 @@ function PageRouter (props) {
           </Container>
           <Container maxWidth='md' style={{ marginTop: 60, marginBottom: 60 }}>
             <Grid container direction="row" justify="flex-start" alignItems="center" spacing={4}> {
+              (isReady())?(
               (displayedRobots.length === 0)? (
                 <Grid item xs={12} style={{ textAlign: 'center' }}>
-                  <Typography color='textSecondary'>No robot in your collection!</Typography>
+                  <Typography style={{ color: '#9e9e9e' }}>
+                    {(ready)?("No robot in wallet!"):("(Connect to wallet)")}
+                  </Typography>
                   <img src={process.env.PUBLIC_URL + "/warning_robot.svg"}></img>
                 </Grid>
               ) : (
                 displayedRobots.map(r =>
                 <Grid item>
-                  <Robot data={r} ready={ready} value={value}/>
+                  <Robot data={r} ready={ready} value={value} openSnack={openSnack} closeSnack={closeSnack}/>
                 </Grid>
                 )
+              )) : (
+                <Grid item xs={12}>
+                <LinearProgress color='secondary'></LinearProgress>
+                </Grid>
               )
 
             } </Grid>

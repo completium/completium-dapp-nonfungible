@@ -1,7 +1,7 @@
 import React from 'react';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
-import { useAccountPkh, useReady } from '../dapp';
+import { useAccountPkh, useReady, useTezos } from '../dapp';
 import ShoppingBasketIcon from '@material-ui/icons/ShoppingBasket';
 import Button from '@material-ui/core/Button';
 import { useNonFungibleStateContext } from '../NonFungibleState.js';
@@ -12,6 +12,7 @@ import Popper from '@material-ui/core/Popper';
 import MenuList from '@material-ui/core/MenuList';
 import { robotributes } from '../robots.js';
 import Divider from '@material-ui/core/Divider';
+import { contractAddress } from '../settings';
 
 const BasketItem = (props) => {
   const { nonFungibleState, setBasket } = useNonFungibleStateContext();
@@ -53,12 +54,13 @@ function getTotal(robots, basket) {
   return total;
 }
 
-const Account = () => {
+const Account = (props) => {
   const account = useAccountPkh();
   const ready = useReady();
-  const { nonFungibleState, setNonFungibleState } = useNonFungibleStateContext();
+  const { nonFungibleState, setNonFungibleState, setNotReady } = useNonFungibleStateContext();
   const [open, setOpen] = React.useState(false);
   const anchorRef = React.useRef(null);
+  const tezos = useTezos();
 
   const handleToggle = () => {
     setOpen((prevOpen) => !prevOpen);
@@ -72,16 +74,15 @@ const Account = () => {
   };
 
   const handleBuy = () => {
-    // transfer basket to wallet
-    var wallet = nonFungibleState.botwallet;
-    nonFungibleState.basket.forEach(id => {
-      wallet.push(id);
-    });
-    console.log(`wallet: ${wallet}`);
-    setNonFungibleState({
-      forsales: nonFungibleState.forsales.filter(id => !(nonFungibleState.basket.includes(id))),
-      basket: [],
-      botwallet: wallet
+    tezos.wallet.at(contractAddress).then(contract => {
+      var amount = getTotal(robotributes, nonFungibleState.basket).toFixed(1);
+      contract.methods.buy(nonFungibleState.basket).send({ amount: amount, mutez: false }).then(op => {
+        props.openSnack();
+        op.receipt().then(() => {
+          props.closeSnack();
+          setNotReady();
+        })
+      })
     });
     setOpen(false);
   }
