@@ -60,7 +60,7 @@ const Robot = (props) => {
         <Grid item>
           { (sold && props.value !== 0)? (
             <img src={process.env.PUBLIC_URL + "/images/streamline-icon-" + props.data.name + "@200x200.svg"} style={{
-              filter: 'grayscale(1) blur(1px)'
+              filter: 'grayscale(1) blur(0px)'
             }}></img>
           ):(
             <img src={process.env.PUBLIC_URL + "/images/streamline-icon-" + props.data.name + "@200x200.svg"}></img>
