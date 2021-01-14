@@ -7,4 +7,4 @@ export const network = "delphinet"
 
 export const appName = "CryptobotCorp."
 
-export const contractAddress = "KT1TxDkwM3AhHmpGE1EuSkXyrzWmgbsAhbWY"
+export const contractAddress = "KT1GV6Z3xQ6xCdY2yzqkSBdL415mDP5SUsRc"
