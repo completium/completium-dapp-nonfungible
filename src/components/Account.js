@@ -74,16 +74,10 @@ const Account = (props) => {
   };
 
   const handleBuy = () => {
-    tezos.wallet.at(contractAddress).then(contract => {
-      var amount = getTotal(robotributes, nonFungibleState.basket).toFixed(1);
-      contract.methods.buy(nonFungibleState.basket).send({ amount: amount, mutez: false }).then(op => {
-        props.openSnack();
-        op.receipt().then(() => {
-          props.closeSnack();
-          setNotReady();
-        })
-      })
-    });
+    ///////////////////////////////////////////////////////////////////////////
+    // FIX ME
+    // Call 'buy' entry point
+    ///////////////////////////////////////////////////////////////////////////
     setOpen(false);
   }
   var basketItems = robotributes.filter(r => nonFungibleState.basket.includes(r.id)).map(r => {

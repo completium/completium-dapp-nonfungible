@@ -60,34 +60,13 @@ function PageRouter (props) {
   }
   robotributes.sort(compareRobot);
   if (!isReady()) {
-    Tezos.contract
-    .at(contractAddress)
-    .then(contract => {
-      contract.storage().then(storage => {
-        var forsales = [];
-        var botwallet = [];
-        // operator is an array
-        storage.operator.forEach(element => {
-          forsales.push(element[1].toString());
-        });
-        // ledger is a map
-        // read ledger for ownership information
-        if (ready) {
-          storage.ledger.forEach((l,k,m) => {
-            if(l === accountAddress) {
-              botwallet.push(k);
-            }
-          })
-        }
-        setNonFungibleState({
-          forsales  : forsales,
-          botwallet : botwallet,
-          basket    : nonFungibleState.basket,
-          ready     : true
-        });
-      })
-    })
-    .catch(error => console.log(`Error: ${error}`));
+    ///////////////////////////////////////////////////////////////////////////
+    // FIX ME
+    // Read conract storage:
+    // * forsales : the list of item for sales
+    // * botwallet : list of purchased items
+    // call 'setNonFungibleState' to set UI state
+    ///////////////////////////////////////////////////////////////////////////
   }
   const handleChange = (event, newValue) => {
     setValue(newValue);

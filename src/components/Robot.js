@@ -25,6 +25,10 @@ const Robot = (props) => {
     setBasket(nonFungibleState.basket.concat([props.data.id]));
   };
   const handleSell = () => {
+    ///////////////////////////////////////////////////////////////////////////
+    // FIX ME
+    // Call 'sell' entry point
+    ///////////////////////////////////////////////////////////////////////////
     tezos.wallet.at(contractAddress).then(contract => {
       contract.methods.sell(props.data.id).send().then(op => {
         props.openSnack();
