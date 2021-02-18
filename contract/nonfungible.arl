@@ -447,7 +447,7 @@ entry reset() {
   called by admin
   effect {
     for token_id_ledger in ledger do
-      operator.addupdate((selfaddress, token_id_ledger, admin), {})
+      operator.addupdate((selfaddress, token_id_ledger, ledger[token_id_ledger].lowner), {})
     done
   }
 }
