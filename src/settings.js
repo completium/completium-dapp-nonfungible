@@ -7,4 +7,4 @@ export const network = "edonet"
 
 export const appName = "CryptobotCorp."
 
-export const contractAddress = "KT1Nhpc12WWwEDfxcToBEhFHKdgbkdQK5oZv"
+export const contractAddress = "KT1QCFXrswDzm9NAHSXifMqYoaa8nq1xDei8"
