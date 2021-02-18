@@ -43,7 +43,7 @@ function useDApp({ appName }) {
         if (!wallet) {
           throw new Error('Thanos Wallet not available');
         }
-        await wallet.connect(network, opts);
+        await wallet.connect("edo2net", opts);
         const tzs = wallet.toTezos();
         const pkh = await tzs.wallet.pkh();
         setState({
