@@ -44,7 +44,7 @@ function PageRouter (props) {
   const [value, setValue] = React.useState(0);
   const [selectedIndex, setSelectedIndex] = React.useState(0);
   const ready = useReady();
-  const Tezos = new TezosToolkit('https://delphinet-tezos.giganode.io/');
+  const Tezos = new TezosToolkit('https://' + network + '-tezos.giganode.io/');
   const { nonFungibleState, isReady, setNonFungibleState, setNotReady } = useNonFungibleStateContext();
   const accountAddress = useAccountPkh();
   const compareRobot = (a, b) => {

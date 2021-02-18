@@ -341,7 +341,7 @@ record operator_param {
 
 entry update_operators (upl : list<or<operator_param, operator_param>>) {
   for up in upl do
-    match_or up with
+    match up with
     | left(param)  -> // add
       dorequire(ledger[param.opp_token_id].lowner = source, "CALLER NOT OWNER");
       operator.addupdate((param.opp_operator, param.opp_token_id, param.opp_owner), {})
@@ -439,4 +439,15 @@ entry sell (tokenid : nat) {
   })])
 }
 
+/* administration */
 
+variable admin : address = @tz1Lc2qBKEWCBeDU8npG6zCeCqpmaegRi6Jg
+
+entry reset() {
+  called by admin
+  effect {
+    for token_id_ledger in ledger do
+      operator.addupdate((selfaddress, token_id_ledger, selfaddress), {})
+    done
+  }
+}
