@@ -1,6 +1,6 @@
 import './App.css';
 import React, { useState, useRef } from 'react';
-import { appTitle, appName, network, contractAddress } from './settings.js';
+import { appTitle, appName, network, endpoint, contractAddress } from './settings.js';
 import HeaderBar from './components/HeaderBar';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -44,7 +44,7 @@ function PageRouter (props) {
   const [value, setValue] = React.useState(0);
   const [selectedIndex, setSelectedIndex] = React.useState(0);
   const ready = useReady();
-  const Tezos = new TezosToolkit('https://' + network + '-tezos.giganode.io/');
+  const Tezos = new TezosToolkit(endpoint);
   const { nonFungibleState, isReady, setNonFungibleState, setNotReady } = useNonFungibleStateContext();
   const accountAddress = useAccountPkh();
   const compareRobot = (a, b) => {
