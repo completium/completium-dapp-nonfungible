@@ -3,9 +3,9 @@ export const githubUrl = "https://github.com/edukera/completium-dapp-ideabox"
 
 export const appTitle = "Collect them all!"
 
-export const network  = "edo2net"
-export const endpoint = 'https://edonet.smartpy.io'
+export const network  = "florencenet"
+export const endpoint = 'https://florencenet.smartpy.io'
 
 export const appName = "CryptobotCorp."
 
-export const contractAddress = "KT1Hefg7wL4dfW3PGFQCN9B7CnBycLZm6utp"
+export const contractAddress = "KT1U2Gg3i2QfD6YyarEQvCnFqMM4KvuKbDGY"
